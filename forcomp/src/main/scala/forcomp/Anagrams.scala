@@ -34,8 +34,13 @@ object Anagrams {
    *  Note: the uppercase and lowercase version of the character are treated as the
    *  same character, and are represented as a lowercase character in the occurrence list.
    */
+  
+  def sortOccurrence(thisOcc:(Char,Int), thatOcc:(Char,Int)): Boolean = {
+      thisOcc._1 < thatOcc._1
+  }
+  
   def wordOccurrences(w: Word): Occurrences = {
-    (List[(Char, Int)]() /: w.toLowerCase().groupBy(identity))((acc, characters) => acc :+ (characters._2.head, characters._2.length)) sortWith ((x: (Char, Int), y: (Char, Int)) => x._1 < y._1)
+    (List[(Char, Int)]() /: w.toLowerCase().groupBy(identity))((acc, characters) => acc :+ (characters._2.head, characters._2.length)) sortWith (sortOccurrence)
 
   }
 
@@ -47,7 +52,7 @@ object Anagrams {
       xs.reduceLeft((x, y) => (x._1, x._2 + y._2))
     }
 
-    (List[(Char, Int)]() /: unGroupedOcc.groupBy(_._1))((acc, characterOcc) => acc :+ reduceOcc(characterOcc._2)) sortWith ((x: (Char, Int), y: (Char, Int)) => x._1 < y._1)
+    (List[(Char, Int)]() /: unGroupedOcc.groupBy(_._1))((acc, characterOcc) => acc :+ reduceOcc(characterOcc._2)) sortWith (sortOccurrence)
   }
 
   /**
@@ -186,14 +191,15 @@ object Anagrams {
   def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
 
     def anagramHelper(occurrences: Occurrences): List[Sentence] = {
-      if (occurrences.isEmpty) {
-        List(List())
-      } else {
-        for {
-          comb <- combinations(occurrences)
-          word <- dictionaryByOccurrences.getOrElse(comb, Nil)
-          rest <- anagramHelper(subtract(occurrences, comb))
-        } yield word :: rest
+      occurrences match {
+        case Nil => List(List())
+        case _ => {
+          for {
+            comb <- combinations(occurrences)
+            word <- dictionaryByOccurrences.getOrElse(comb, Nil)
+            rest <- anagramHelper(subtract(occurrences, comb))
+          } yield word :: rest
+        }
       }
     }
     anagramHelper(sentenceOccurrences(sentence))
