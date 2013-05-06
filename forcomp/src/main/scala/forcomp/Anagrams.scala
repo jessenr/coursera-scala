@@ -34,11 +34,11 @@ object Anagrams {
    *  Note: the uppercase and lowercase version of the character are treated as the
    *  same character, and are represented as a lowercase character in the occurrence list.
    */
-  
-  def sortOccurrence(thisOcc:(Char,Int), thatOcc:(Char,Int)): Boolean = {
-      thisOcc._1 < thatOcc._1
+
+  def sortOccurrence(thisOcc: (Char, Int), thatOcc: (Char, Int)): Boolean = {
+    thisOcc._1 < thatOcc._1
   }
-  
+
   def wordOccurrences(w: Word): Occurrences = {
     (List[(Char, Int)]() /: w.toLowerCase().groupBy(identity))((acc, characters) => acc :+ (characters._2.head, characters._2.length)) sortWith (sortOccurrence)
 
@@ -131,18 +131,15 @@ object Anagrams {
    */
   def subtract(x: Occurrences, y: Occurrences): Occurrences = {
 
+    val yMap = y.toMap withDefaultValue 0
+    
     (List[(Char, Int)]() /: x)((acc, characterCount) => acc ++ {
-
-      y find (_._1 == characterCount._1) match {
-        case None => List(characterCount)
-        case Some((character, occur)) => {
-          val newOccur = characterCount._2 - occur
-          if (newOccur <= 0) {
-            Nil
-          } else {
-            List((character, newOccur))
-          }
+    	
+      yMap(characterCount._1) match {
+        case occur if characterCount._2 - occur > 0 => {
+          List((characterCount._1, characterCount._2 - occur))
         }
+        case _ => Nil 
       }
     })
   }
