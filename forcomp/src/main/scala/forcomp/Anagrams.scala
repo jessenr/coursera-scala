@@ -132,14 +132,14 @@ object Anagrams {
   def subtract(x: Occurrences, y: Occurrences): Occurrences = {
 
     val yMap = y.toMap withDefaultValue 0
-    
+
     (List[(Char, Int)]() /: x)((acc, characterCount) => acc ++ {
-    	
-      yMap(characterCount._1) match {
-        case occur if characterCount._2 - occur > 0 => {
-          List((characterCount._1, characterCount._2 - occur))
-        }
-        case _ => Nil 
+
+      val newOccur = characterCount._2 - yMap(characterCount._1)
+      if (newOccur <= 0) {
+        Nil
+      } else {
+        List((characterCount._1, newOccur))
       }
     })
   }
